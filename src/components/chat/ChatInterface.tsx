@@ -34,6 +34,15 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
       return conversationsApi.getById(conversationId);
     },
     enabled: !!conversationId,
+    refetchInterval: (query) => {
+      // Poll every 2s if the last message is from the user (waiting for AI)
+      const data = query.state.data as Conversation | undefined;
+      const messages = data?.messages || [];
+      if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+        return 2000;
+      }
+      return false;
+    }
   });
 
   // Scroll to bottom when messages change
@@ -51,8 +60,8 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
 
   // Mutation for creating a new conversation
   const createConversationMutation = useMutation({
-    mutationFn: (data: { message: string; image?: File }) =>
-      conversationsApi.create(data.message, data.image),
+    mutationFn: (data: { message: string; images?: File[] }) =>
+      conversationsApi.create(data.message, data.images),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       router.push(`/chat/${data.id}`);
@@ -61,8 +70,8 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
 
   // Mutation for adding a message to existing conversation
   const addMessageMutation = useMutation({
-    mutationFn: (data: { conversationId: string; content: string; image?: File }) =>
-      conversationsApi.addMessage(data.conversationId, data.content, data.image),
+    mutationFn: (data: { conversationId: string; content: string; images?: File[] }) =>
+      conversationsApi.addMessage(data.conversationId, data.content, data.images),
     onSuccess: (newMessage) => {
       setPendingAssistantMessage(newMessage);
       queryClient.invalidateQueries({ queryKey: ['conversation', conversationId] });
@@ -100,13 +109,13 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
       addMessageMutation.mutate({
         conversationId: conversationId,
         content: input,
-        image: images[0],
+        images: images,
       });
     } else {
       // Create new conversation
       createConversationMutation.mutate({
         message: input,
-        image: images[0],
+        images: images,
       });
     }
 
@@ -203,16 +212,30 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
                         Agente
                       </div>
                     )}
-                    {message.image_path && (
+                    {((message.images && message.images.length > 0) || message.image_path) && (
                       <div className={cn(
-                        "relative w-fit max-w-xl rounded-2xl overflow-hidden border border-gray-100 shadow-lg mb-2",
-                        message.role === 'user' && "ml-auto"
+                        "flex flex-wrap gap-2 mb-2",
+                        message.role === 'user' && "justify-end"
                       )}>
-                        <img
-                          src={`/api/${message.image_path}`}
-                          alt="Consulta"
-                          className="w-auto max-h-[150px] object-contain bg-gray-50"
-                        />
+                        {message.images?.map((img) => (
+                          <div key={img.id} className="relative w-fit rounded-2xl overflow-hidden border border-gray-100 shadow-lg">
+                            <img
+                              src={`/api/${img.image_path}`}
+                              alt="Análisis"
+                              className="w-auto max-h-[150px] object-contain bg-gray-50"
+                            />
+                          </div>
+                        ))}
+                        {/* Fallback para mensajes antiguos con una sola imagen */}
+                        {message.image_path && (!message.images || message.images.length === 0) && (
+                          <div className="relative w-fit rounded-2xl overflow-hidden border border-gray-100 shadow-lg">
+                            <img
+                              src={`/api/${message.image_path}`}
+                              alt="Consulta"
+                              className="w-auto max-h-[150px] object-contain bg-gray-50"
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                     <div className="text-gray-900 text-lg leading-relaxed">
@@ -228,13 +251,18 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
                 </div>
               ))}
 
-              {/* Show pending message while loading */}
-              {addMessageMutation.isPending && (
-                <div className="flex gap-4 items-start">
+              {/* Show thinking indicator if last message is from user (waiting for background AI) or mutation is pending */}
+              {((messages.length > 0 && messages[messages.length - 1].role === 'user') || addMessageMutation.isPending) && (
+                <div className="flex gap-4 items-start animate-in fade-in duration-300">
                   <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white flex-shrink-0 mt-1 shadow-md">
                     <Bot className="w-5 h-5" />
                   </div>
-                  <LoadingAnimation />
+                  <div className="flex flex-col gap-1">
+                    <div className="font-semibold text-primary-600 text-sm uppercase tracking-wider">
+                      Agente
+                    </div>
+                    <LoadingAnimation />
+                  </div>
                 </div>
               )}
 

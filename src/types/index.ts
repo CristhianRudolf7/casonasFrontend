@@ -25,12 +25,20 @@ export interface AuthTokens {
 }
 
 // Message types
+export interface MessageImage {
+  id: number;
+  image_path: string;
+  image_analysis: string | null;
+}
+
 export interface Message {
   id: number;
   conversation_id: string;
   role: 'user' | 'assistant';
   content: string;
   image_path: string | null;
+  image_analysis: string | null;
+  images: MessageImage[];
   created_at: string;
 }
 

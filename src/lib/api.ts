@@ -92,11 +92,13 @@ export const conversationsApi = {
     return response.data;
   },
   
-  create: async (message: string, image?: File): Promise<Conversation> => {
+  create: async (message: string, images?: File[]): Promise<Conversation> => {
     const formData = new FormData();
     formData.append('message', message);
-    if (image) {
-      formData.append('image', image);
+    if (images && images.length > 0) {
+      images.forEach((image) => {
+        formData.append('images', image);
+      });
     }
     
     const response = await api.post<Conversation>('/conversations', formData, {
@@ -107,11 +109,13 @@ export const conversationsApi = {
     return response.data;
   },
   
-  addMessage: async (conversationId: string, content: string, image?: File): Promise<Message> => {
+  addMessage: async (conversationId: string, content: string, images?: File[]): Promise<Message> => {
     const formData = new FormData();
     formData.append('message', content);
-    if (image) {
-      formData.append('image', image);
+    if (images && images.length > 0) {
+      images.forEach((image) => {
+        formData.append('images', image);
+      });
     }
     
     const response = await api.post<Message>(`/conversations/${conversationId}/messages`, formData, {
@@ -127,9 +131,7 @@ export const conversationsApi = {
   },
   
   rename: async (id: string, title: string): Promise<Conversation> => {
-    const formData = new FormData();
-    formData.append('title', title);
-    const response = await api.patch<Conversation>(`/conversations/${id}`, formData);
+    const response = await api.patch<Conversation>(`/conversations/${id}`, { title });
     return response.data;
   },
   

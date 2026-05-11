@@ -229,7 +229,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                           <span className="truncate">{c.title || 'Sin título'}</span>
                         </Link>
                         
-                        <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center">
+                        <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center z-10">
                           <button
                             onClick={(e) => {
                               e.preventDefault();
@@ -237,27 +237,35 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                               setMenuOpenId(menuOpenId === c.id ? null : c.id);
                             }}
                             className={cn(
-                              "p-1 rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-all",
+                              "p-1.5 rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-all",
                               menuOpenId === c.id ? "opacity-100 bg-gray-100" : "opacity-0 group-hover:opacity-100"
                             )}
                           >
-                            <MoreVertical className="w-3.5 h-3.5" />
+                            <MoreVertical className="w-4 h-4" />
                           </button>
                           
                           {menuOpenId === c.id && (
                             <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-100 rounded-lg shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                               <button
-                                onClick={() => startEditing(c.id, c.title || '')}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  startEditing(c.id, c.title || '');
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
                               >
-                                <Pencil className="w-3 h-3" />
+                                <Pencil className="w-3.5 h-3.5" />
                                 <span>Renombrar</span>
                               </button>
                               <button
-                                onClick={() => deleteMutation.mutate(c.id)}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  deleteMutation.mutate(c.id);
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-red-600 hover:bg-red-50 transition-colors"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-3.5 h-3.5" />
                                 <span>Eliminar</span>
                               </button>
                             </div>
