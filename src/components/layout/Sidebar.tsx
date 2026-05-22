@@ -26,6 +26,8 @@ import { Loading, Input, Button } from '@/components/ui';
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 const menuItems = [
@@ -41,9 +43,8 @@ const menuItems = [
   },
 ];
 
-export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [chatExpanded, setChatExpanded] = useState(true);
 
   const queryClient = useQueryClient();
@@ -92,23 +93,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-md border border-gray-200"
-      >
-        {mobileOpen ? (
-          <X className="w-5 h-5 text-gray-600" />
-        ) : (
-          <Menu className="w-5 h-5 text-gray-600" />
-        )}
-      </button>
-
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/20 z-30"
-          onClick={() => setMobileOpen(false)}
+          onClick={onCloseMobile}
         />
       )}
 
@@ -142,7 +131,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           {/* Dashboard Item */}
           <Link
             href="/dashboard"
-            onClick={() => setMobileOpen(false)}
+            onClick={onCloseMobile}
             className={cn(
               'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
               pathname === '/dashboard'
@@ -160,7 +149,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <Link
                 href="/chat"
                 onClick={() => {
-                  setMobileOpen(false);
+                  onCloseMobile?.();
                   setChatExpanded(true);
                 }}
                 className={cn(
@@ -187,7 +176,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <div className="ml-6 space-y-1 pr-2">
                 <Link
                   href="/chat"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={onCloseMobile}
                   className="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                 >
                   <PlusCircle className="w-4 h-4" />
@@ -217,7 +206,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       <>
                         <Link
                           href={`/chat/${c.id}`}
-                          onClick={() => setMobileOpen(false)}
+                          onClick={onCloseMobile}
                           className={cn(
                             'flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors truncate pr-8',
                             pathname === `/chat/${c.id}`

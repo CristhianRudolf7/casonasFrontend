@@ -12,6 +12,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -29,18 +30,26 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="h-screen bg-gray-50 overflow-hidden flex flex-col">
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-      <Header sidebarCollapsed={collapsed} />
+    <div className="min-h-screen bg-gray-50">
+      <Sidebar 
+        collapsed={collapsed} 
+        onToggle={() => setCollapsed(!collapsed)} 
+        mobileOpen={mobileOpen}
+        onCloseMobile={() => setMobileOpen(false)}
+      />
+      <Header 
+        sidebarCollapsed={collapsed} 
+        onMenuClick={() => setMobileOpen(true)}
+      />
+      
       <main
         className={cn(
-          'pt-16 h-full transition-all duration-300 flex flex-col overflow-hidden',
-          collapsed ? 'pl-16' : 'pl-64',
-          'pl-0 lg:pl-64'
+          'transition-all duration-300 min-h-screen',
+          collapsed ? 'lg:pl-16' : 'lg:pl-64',
+          'pl-0'
         )}
-        style={{ paddingLeft: collapsed ? '4rem' : '16rem' }}
       >
-        <div className="flex-1 overflow-hidden">
+        <div className="pt-16 h-full">
           {children}
         </div>
       </main>

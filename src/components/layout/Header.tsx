@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { LogOut, User, Key, ChevronDown } from 'lucide-react';
+import { LogOut, User, Key, ChevronDown, Menu } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -9,9 +9,10 @@ import ChangePasswordModal from '../auth/ChangePasswordModal';
 
 interface HeaderProps {
   sidebarCollapsed: boolean;
+  onMenuClick?: () => void;
 }
 
-export default function Header({ sidebarCollapsed }: HeaderProps) {
+export default function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -37,7 +38,14 @@ export default function Header({ sidebarCollapsed }: HeaderProps) {
         )}
         style={{ left: sidebarCollapsed ? '4rem' : '16rem' }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+          
           <h1 className="text-lg font-semibold text-gray-800">
             Bienvenido, <span className="text-primary-600">{user?.full_name}</span>
           </h1>

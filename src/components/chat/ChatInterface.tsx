@@ -63,8 +63,12 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
     mutationFn: (data: { message: string; images?: File[] }) =>
       conversationsApi.create(data.message, data.images),
     onSuccess: (data) => {
+      if (!data?.id) return;
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      router.push(`/chat/${data.id}`);
+      // Pequeño delay para asegurar que el estado de la mutación se limpie antes de navegar
+      setTimeout(() => {
+        router.push(`/chat/${data.id}`);
+      }, 0);
     },
   });
 

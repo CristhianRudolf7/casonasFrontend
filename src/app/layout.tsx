@@ -5,6 +5,9 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Casonas - Análisis de Restauración',
   description: 'Sistema de análisis de casonas con IA para restauración',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

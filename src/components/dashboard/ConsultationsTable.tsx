@@ -36,7 +36,7 @@ export default function ConsultationsTable({ consultations }: ConsultationsTable
                 </td>
               </tr>
             ) : (
-              consultations.map((conversation) => (
+              consultations.slice(0, 5).map((conversation) => (
                 <tr key={conversation.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {format(new Date(conversation.updated_at), "d MMM yyyy, HH:mm", { locale: es })}
