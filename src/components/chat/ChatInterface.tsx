@@ -353,10 +353,10 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
 
             <button
               type="submit"
-              disabled={!input.trim() || isPending}
+              disabled={(!input.trim() && images.length === 0) || isPending}
               className={cn(
                 "p-3 rounded-xl transition-all ml-1",
-                input.trim() && !isPending
+                (input.trim() || images.length > 0) && !isPending
                   ? "bg-primary-600 text-white shadow-lg hover:bg-primary-700 active:scale-95"
                   : "text-gray-300 bg-gray-100"
               )}
