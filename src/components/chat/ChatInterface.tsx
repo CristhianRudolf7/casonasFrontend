@@ -141,28 +141,7 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
   const messages = conversation?.messages || [];
 
   return (
-    <div className="bg-white flex flex-col h-full w-full overflow-hidden">
-      {/* Chat Header */}
-      <div className="px-6 py-3 border-b border-gray-100 bg-white flex-shrink-0">
-        <div className="flex items-center justify-between max-w-5xl mx-auto w-full">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary-50 rounded-lg text-primary-600">
-              <MessageSquare className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 leading-none">
-                {conversation?.title || 'Nueva Conversación'}
-              </h3>
-            </div>
-          </div>
-          {conversationId && (
-            <Button variant="outline" size="sm" onClick={handleNewChat}>
-              <Plus className="w-4 h-4 mr-1" />
-              Nuevo Chat
-            </Button>
-          )}
-        </div>
-      </div>
+    <div className="bg-white flex flex-col h-[calc(100vh-4rem)] w-full overflow-hidden">
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto bg-white scroll-smooth">
@@ -251,6 +230,42 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
                         </div>
                       )}
                     </div>
+
+                    {/* Pathology detection images */}
+                    {message.role === 'assistant' && message.restored_images && (() => {
+                      try {
+                        const paths: string[] = JSON.parse(message.restored_images);
+                        if (paths.length === 0) return null;
+                        return (
+                          <div className="mt-4 space-y-3">
+                            <div className="flex items-center gap-2">
+                              <div className="h-px flex-1 bg-gradient-to-r from-primary-200 to-transparent" />
+                              <span className="text-xs font-semibold text-primary-600 uppercase tracking-widest px-2 py-1 bg-primary-50 rounded-full">
+                                ✨ Detección de Patologías IA
+                              </span>
+                              <div className="h-px flex-1 bg-gradient-to-l from-primary-200 to-transparent" />
+                            </div>
+                            <p className="text-xs text-gray-400 italic">
+                              Patologías detectadas y anotadas sobre la imagen original
+                            </p>
+                            <div className="grid grid-cols-2 gap-3">
+                              {paths.map((p, idx) => (
+                                <div key={idx} className="group relative rounded-2xl overflow-hidden border-2 border-primary-100 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">
+                                  <img
+                                    src={`/api/${p}`}
+                                    alt={`Análisis de patología ${idx + 1}`}
+                                    className="w-full h-auto object-cover"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                                    <span className="text-white text-xs font-medium">Analizada {idx + 1}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      } catch { return null; }
+                    })()}
                   </div>
                 </div>
               ))}

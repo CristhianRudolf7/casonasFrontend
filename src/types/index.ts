@@ -39,6 +39,7 @@ export interface Message {
   image_path: string | null;
   image_analysis: string | null;
   images: MessageImage[];
+  restored_images: string | null;  // JSON string list of restored image paths
   created_at: string;
 }
 

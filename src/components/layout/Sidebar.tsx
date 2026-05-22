@@ -104,13 +104,13 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-40 transition-all duration-300',
+          'fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-40 transition-all duration-300 flex flex-col',
           collapsed ? 'w-16' : 'w-64',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 flex-shrink-0">
           {!collapsed && (
             <span className="text-xl font-bold text-primary-600">Casonas</span>
           )}
@@ -127,7 +127,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile
         </div>
 
         {/* Navigation */}
-        <nav className="p-3 space-y-1">
+        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
           {/* Dashboard Item */}
           <Link
             href="/dashboard"
