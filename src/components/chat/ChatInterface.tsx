@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { MessageSquare, Image as ImageIcon, Send, User, Bot, Loader2, X, Plus } from 'lucide-react';
+import { MessageSquare, Image as ImageIcon, Send, User, Bot, Loader2, X, Plus, Download } from 'lucide-react';
 import { Button, Input, Loading } from '@/components/ui';
 import { conversationsApi } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -20,6 +20,29 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [pendingAssistantMessage, setPendingAssistantMessage] = useState<Message | null>(null);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
+
+  const handleDownload = async (imageUrl: string, filename: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al descargar la imagen:', error);
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.target = '_blank';
+      link.download = filename;
+      link.click();
+    }
+  };
   const MAX_IMAGES = 5;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -246,17 +269,30 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
                               <div className="h-px flex-1 bg-gradient-to-l from-primary-200 to-transparent" />
                             </div>
                             <p className="text-xs text-gray-400 italic">
-                              Patologías detectadas y anotadas sobre la imagen original
+                              Patologías detectadas y anotadas sobre la imagen original (Haz clic para ampliar)
                             </p>
                             <div className="grid grid-cols-2 gap-3">
                               {paths.map((p, idx) => (
-                                <div key={idx} className="group relative rounded-2xl overflow-hidden border-2 border-primary-100 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">
+                                <div 
+                                  key={idx} 
+                                  className="group relative rounded-2xl overflow-hidden border-2 border-primary-100 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] cursor-pointer"
+                                  onClick={() => setActiveImage(`/api/${p}`)}
+                                >
                                   <img
                                     src={`/api/${p}`}
                                     alt={`Análisis de patología ${idx + 1}`}
                                     className="w-full h-auto object-cover"
                                   />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
+                                    <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                      <button
+                                        onClick={() => handleDownload(`/api/${p}`, `patologia-${idx + 1}.jpg`)}
+                                        className="p-1.5 bg-black/50 hover:bg-black/75 text-white rounded-lg backdrop-blur-sm transition-colors border border-white/20"
+                                        title="Descargar imagen"
+                                      >
+                                        <Download className="w-4 h-4" />
+                                      </button>
+                                    </div>
                                     <span className="text-white text-xs font-medium">Analizada {idx + 1}</span>
                                   </div>
                                 </div>
@@ -388,6 +424,40 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
           </p>
         </form>
       </div>
+
+      {/* Lightbox / Modal de visualización */}
+      {activeImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setActiveImage(null)}
+        >
+          <button 
+            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 backdrop-blur-sm transition-colors"
+            onClick={() => setActiveImage(null)}
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <div 
+            className="relative max-w-[95vw] max-h-[95vh] flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src={activeImage} 
+              alt="Visualización ampliada" 
+              className="max-w-full max-h-[82vh] md:max-h-[85vh] object-contain rounded-lg shadow-2xl border border-white/10"
+            />
+            
+            <button
+              onClick={() => handleDownload(activeImage, 'patologia-detectada.jpg')}
+              className="flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl font-medium hover:bg-gray-100 active:scale-95 transition-all shadow-lg"
+            >
+              <Download className="w-5 h-5" />
+              Descargar Imagen
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
